@@ -4,7 +4,12 @@ A real-time chat application frontend built with React, TypeScript, Vite, and Re
 
 ![Application Architecture](documentation/architecture_diagram.png)
 
-## 🚀 Technologies Used
+**Note**: This frontend is designed to work with the corresponding Spring Boot backend. Ensure both applications are running for full functionality.
+
+- [Backend Repository](https://github.com/jakubp03/chatapp-spring-backend)
+
+
+## Technologies Used
 
 - **React 19** 
 - **TypeScript** 
@@ -13,17 +18,23 @@ A real-time chat application frontend built with React, TypeScript, Vite, and Re
 - **Material-UI (MUI)** 
 - **STOMP/SockJS** 
 
-## 📋 Features
+## Features
 
 - User registration and login with JWT authentication
-- Real-time messaging via WebSocket/STOMP
-- Automatic token refresh
+- Automatic access-token validation and refresh, with logout support
 - Protected routes
-- Responsive design with Material-UI
-- Message history
+- Real-time one-to-one and group chat messaging via WebSocket/STOMP
+- Create named chats and find users by username to add as members
+- Chat list search and sorting by recent activity
+- Message history with locally cached messages and retrieval of queued messages
+- Notifications when added to a chat
+- User profile page with avatar viewing and URL updates
+- Emoji picker, grouped message display, sender avatars, and localized timestamps
+- Automatic WebSocket reconnection and connection-state handling
+- Responsive Material-UI interface with mobile navigation
 - Type-safe codebase with TypeScript
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 src/
@@ -58,7 +69,7 @@ src/
 └── App.tsx                   # Main app component
 ```
 
-## 🛠️ Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 - Node.js (v22 or higher)
@@ -103,7 +114,7 @@ src/
 5. **Access the application**
    - Open `http://localhost:5173` in your browser
 
-## 🐋 Docker Setup
+## Docker Setup
 
 ### Development with Docker
 ```bash
@@ -119,7 +130,7 @@ cd chatapp-spring-backend
 docker-compose up --build
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### API Configuration
 The API base URL is configured in [`src/services/Api.tsx`](src/services/Api.tsx):
@@ -142,65 +153,40 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 ```
 
-## 🔐 Authentication Flow
+## Authentication Flow
 
 1. User registers/logs in via [`Login.tsx`](src/components/auth/Login.tsx) or [`Register.tsx`](src/components/auth/Register.tsx)
 2. JWT tokens are received and stored via [`AuthHandler`](src/components/auth/AuthHandler.tsx)
 3. Protected routes are accessed through [`ProtectedRoute`](src/components/ProtectedRoute.tsx)
 4. Automatic token refresh handles expired access tokens
 
-## 💬 Real-time Messaging
+## Real-time Messaging
 
 The application uses WebSocket/STOMP for real-time communication:
-- Connection managed by [`WebSocketHandler`](src/components/WebSocketHandler.tsx)
-- Messages sent to `/app/chat` endpoint
-- Real-time updates received from `/topic/messages`
+- Connection and chat subscriptions managed by [`WebSocketHandler`](src/components/providers/WebSocketHandler.tsx)
+- Messages sent to `/app/chatview/{chatViewId}`
+- Chat messages received from `/user/queue/chatview/{chatViewId}`
+- Chat membership notifications received from `/user/queue/notifications`
+- Connection state is shown in the chat experience, and the client reconnects after connection loss
 - Message state managed in [`chatViewSlice`](src/store/slices/chatViewSlice.ts)
+- Existing messages are loaded from the API and cached in browser storage; queued messages are fetched when needed
 
-## 📊 State Management
+## Profile and Chat Management
 
-### Auth State
-```typescript
-{
-   token: string | null,
-   user: {
-      email: string | null, 
-      name: string | null,
-      uid: string | null
-   },
-   isValidating: boolean,
-}
-```
+- Create named chats by searching for users and selecting members
+- Search and sort the chat list by recent activity
+- View and update the signed-in user's avatar URL on the profile page
+- Open notifications for newly added chats and load their messages
 
-### Chat State
-```typescript
-{
-  chatViewCollection: [{
-    id: number,
-    title: string,
-    messages: Message[],
-    isLoading: boolean,
-    error: string | null
-  }]
-}
-```
 
-### WebSocket State
-```typescript
-{
-  stompClient: Client | null,
-  connectionStatus: 'connected' | 'disconnected' | 'connecting' | 'error'
-}
-```
-
-## 🎨 Styling
+## Styling
 
 - **Material-UI (MUI)** for modern, responsive components
 - **Custom CSS** in [`src/style/`](src/style/) for chat-specific styling
 - **FontAwesome** icons for UI elements
 - Dark theme with customizable Material-UI theming
 
-## 📱 Responsive Design
+## Responsive Design
 
 The application is fully responsive with:
 - Material-UI Grid system
@@ -208,7 +194,7 @@ The application is fully responsive with:
 - Responsive message bubbles
 - Adaptive sidebar layout
 
-## 🔍 Key Components
+## Key Components
 
 ### ChatView
 The main chat interface that handles:
@@ -230,7 +216,7 @@ Manages authentication state:
 - User session management
 - Request/response interceptors
 
-## 📋 Dependencies
+## Dependencies
 
 ### Production Dependencies
 - `react` & `react-dom` - Core React (v19)
@@ -249,7 +235,7 @@ Manages authentication state:
 - `@typescript-eslint/*` - TypeScript ESLint plugins
 - Various type definitions (`@types/*`)
 
-## 🚀 Deployment
+## Deployment
 
 ### Using Docker (Recommended)
 The application is containerized and deployed using Docker Compose from the backend repository.
@@ -264,7 +250,7 @@ The application is containerized and deployed using Docker Compose from the back
 
 3. **Configure environment variables** for production API URLs
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -284,25 +270,28 @@ The application is containerized and deployed using Docker Compose from the back
    - Update dependencies
    - Check Node.js version compatibility
 
-## 📚 Documentation
+## Documentation
 
 #### Token Refresh Flowchart
 ![Token Refresh Sequence](documentation/flowchart_error_handling.png)
 *Token refresh mechanism*
+
+#### Message Flow
+![Message Recieving Sequence](documentation/message_flow.png)
+*Message recieving mechanism*
+
+#### Group chat initialization
+![Group chat initial sequence](documentation/chatview_flow.png)
+*Mechanism for loading messages in groupchat*
+
 
 Additional documentation available in the [backend repository](https://github.com/jakubp03/chatapp-spring-backend):
 - Architecture diagrams
 - Sequence diagrams
 - API integration guides
 
-## 🔗 Related Projects
-
-- [Backend Repository](https://github.com/jakubp03/chatapp-spring-backend) - Spring Boot backend application
-
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
 
 ---
-
-**Note**: This frontend is designed to work with the corresponding Spring Boot backend. Ensure both applications are running for full functionality.

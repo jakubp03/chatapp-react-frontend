@@ -39,7 +39,6 @@ function App() {
             <Route path="/" element={<ChatView id={currentlyDisplayedChatView} />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
-
         </Routes>
       </ThemeProvider>
     </AuthHandler>

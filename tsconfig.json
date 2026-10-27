@@ -17,7 +17,7 @@
       "jest",
       "node"
     ],
-    "baseUrl": "src" // Optional: helps resolve absolute paths from 'src'
+    "baseUrl": "src"
   },
   "exclude": [
     "node_modules",
